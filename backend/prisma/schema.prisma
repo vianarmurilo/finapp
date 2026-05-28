@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String         @id @default(uuid()) @db.Uuid
+  name              String         @db.VarChar(120)
+  email             String         @unique @db.VarChar(180)
+  passwordHash      String         @db.VarChar(255)
+  avatarUrl         String?        @db.VarChar(500)
+  currency          String         @default("BRL") @db.VarChar(10)
+  timezone          String         @default("America/Sao_Paulo") @db.VarChar(80)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  role              UserRole       @default(USER)
+  blockedAt         DateTime?
+  isBlocked         Boolean        @default(false)
+  badges            Badge[]
+  categories        Category[]
+  envelopes         Envelope[]
+  ownedFamilyGroups FamilyGroup[]  @relation("FamilyGroupOwner")
+  familyMemberships FamilyMember[]
+  goals             Goal[]
+  goalMovements     GoalMovement[]
+  receiptScans      ReceiptScan[]
+  streakRecords     StreakRecord[]
+  subscriptions     Subscription[]
+  transactions      Transaction[]
+}
+
+model Category {
+  id            String          @id @default(uuid()) @db.Uuid
+  userId        String?         @db.Uuid
+  name          String          @db.VarChar(120)
+  type          TransactionType
+  icon          String?         @db.VarChar(80)
+  color         String?         @db.VarChar(20)
+  keywords      String[]        @default([])
+  isDefault     Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  user          User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  envelopes     Envelope[]
+  subscriptions Subscription[]
+  transactions  Transaction[]
+
+  @@unique([userId, name, type])
+  @@index([userId])
+}
+
+model Transaction {
+  id            String          @id @default(uuid()) @db.Uuid
+  userId        String          @db.Uuid
+  categoryId    String          @db.Uuid
+  familyGroupId String?         @db.Uuid
+  type          TransactionType
+  amount        Decimal         @db.Decimal(14, 2)
+  description   String          @db.VarChar(255)
+  occurredAt    DateTime
+  paymentMethod String?         @db.VarChar(60)
+  isRecurring   Boolean         @default(false)
+  merchant      String?         @db.VarChar(120)
+  tags          String[]        @default([])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  receiptScan   ReceiptScan?
+  category      Category        @relation(fields: [categoryId], references: [id])
+  familyGroup   FamilyGroup?    @relation(fields: [familyGroupId], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, occurredAt])
+  @@index([categoryId, occurredAt])
+  @@index([familyGroupId, occurredAt])
+}
+
+model Goal {
+  id            String         @id @default(uuid()) @db.Uuid
+  userId        String         @db.Uuid
+  title         String         @db.VarChar(140)
+  description   String?        @db.VarChar(400)
+  targetAmount  Decimal        @db.Decimal(14, 2)
+  currentAmount Decimal        @default(0) @db.Decimal(14, 2)
+  deadline      DateTime?
+  status        GoalStatus     @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movements     GoalMovement[]
+
+  @@index([userId, status])
+}
+
+model GoalMovement {
+  id        String           @id @default(uuid()) @db.Uuid
+  goalId    String           @db.Uuid
+  userId    String           @db.Uuid
+  type      GoalMovementType
+  amount    Decimal          @db.Decimal(14, 2)
+  note      String?          @db.VarChar(255)
+  createdAt DateTime         @default(now())
+  goal      Goal             @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([goalId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model Subscription {
+  id              String                @id @default(uuid()) @db.Uuid
+  userId          String                @db.Uuid
+  categoryId      String?               @db.Uuid
+  name            String                @db.VarChar(140)
+  amount          Decimal               @db.Decimal(14, 2)
+  frequency       SubscriptionFrequency
+  nextChargeDate  DateTime
+  isActive        Boolean               @default(true)
+  detectionSource DetectionSource       @default(MANUAL)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  category        Category?             @relation(fields: [categoryId], references: [id])
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, nextChargeDate])
+  @@index([categoryId])
+}
+
+model FamilyGroup {
+  id           String         @id @default(uuid()) @db.Uuid
+  name         String         @db.VarChar(140)
+  ownerUserId  String         @db.Uuid
+  inviteCode   String         @unique @db.VarChar(20)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  owner        User           @relation("FamilyGroupOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  members      FamilyMember[]
+  transactions Transaction[]
+
+  @@index([ownerUserId])
+}
+
+model FamilyMember {
+  id            String      @id @default(uuid()) @db.Uuid
+  familyGroupId String      @db.Uuid
+  userId        String      @db.Uuid
+  role          FamilyRole  @default(MEMBER)
+  joinedAt      DateTime    @default(now())
+  familyGroup   FamilyGroup @relation(fields: [familyGroupId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([familyGroupId, userId])
+  @@index([userId])
+}
+
+model AdvisorCache {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String   @db.Uuid
+  insights         Json
+  financialContext Json
+  generatedAt      DateTime @default(now()) @db.Timestamptz(6)
+  expiresAt        DateTime @db.Timestamptz(6)
+
+  @@index([userId, generatedAt])
+}
+
+model Envelope {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @db.Uuid
+  categoryId   String?   @db.Uuid
+  name         String    @db.VarChar(140)
+  budgetAmount Decimal   @db.Decimal(14, 2)
+  currentSpent Decimal   @default(0) @db.Decimal(14, 2)
+  month        Int
+  year         Int
+  color        String    @db.VarChar(20)
+  icon         String    @db.VarChar(80)
+  createdAt    DateTime  @default(now())
+  category     Category? @relation(fields: [categoryId], references: [id])
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, month, year])
+  @@index([categoryId])
+}
+
+model StreakRecord {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @db.Uuid
+  date         DateTime
+  withinBudget Boolean
+  streakCount  Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model Badge {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId   String   @db.Uuid
+  type     String   @db.VarChar(80)
+  earnedAt DateTime @default(now())
+  metadata Json
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@index([userId, earnedAt])
+}
+
+model ReceiptScan {
+  id            String       @id @default(cuid())
+  userId        String       @db.Uuid
+  transactionId String?      @unique @db.Uuid
+  imageUrl      String?      @db.VarChar(500)
+  rawExtraction Json
+  confidence    Float
+  createdAt     DateTime     @default(now())
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  PAUSED
+  CANCELLED
+}
+
+enum GoalMovementType {
+  DEPOSIT
+  WITHDRAW
+}
+
+enum SubscriptionFrequency {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DetectionSource {
+  MANUAL
+  AUTO
+}
+
+enum FamilyRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}

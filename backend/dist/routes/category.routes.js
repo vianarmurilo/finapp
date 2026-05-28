@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.categoryRouter = void 0;
+const express_1 = require("express");
+const category_controller_1 = require("../controllers/category.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const category_extended_repository_1 = require("../repositories/category-extended.repository");
+const category_service_1 = require("../services/category.service");
+const categoryRepository = new category_extended_repository_1.CategoryExtendedRepository();
+const categoryService = new category_service_1.CategoryService(categoryRepository);
+const categoryController = new category_controller_1.CategoryController(categoryService);
+exports.categoryRouter = (0, express_1.Router)();
+exports.categoryRouter.use(auth_middleware_1.authMiddleware);
+exports.categoryRouter.get("/", categoryController.list);
+exports.categoryRouter.post("/", categoryController.create);
+exports.categoryRouter.get("/suggest", categoryController.suggest);
+exports.categoryRouter.put("/:id", categoryController.update);
+exports.categoryRouter.delete("/:id", categoryController.delete);

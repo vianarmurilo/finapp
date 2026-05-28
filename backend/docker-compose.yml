@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: finmind-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: finmind_ai
+    ports:
+      - "5433:5432"
+    volumes:
+      - finmind_pgdata:/var/lib/postgresql/data
+
+volumes:
+  finmind_pgdata:

@@ -1,0 +1,1 @@
+ C:\\Users\\Murilo\\OneDrive\ -\ SenacRS\\Área\ de\ Trabalho\\Projeto_flutter\\financeiro\\.dart_tool\\flutter_build\\6b1916b50cd3781835bd8f413f18633c\\native_assets.json: 

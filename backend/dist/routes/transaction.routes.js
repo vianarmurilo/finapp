@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.transactionRouter = void 0;
+const express_1 = require("express");
+const transaction_controller_1 = require("../controllers/transaction.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const category_repository_1 = require("../repositories/category.repository");
+const transaction_repository_1 = require("../repositories/transaction.repository");
+const transaction_service_1 = require("../services/transaction.service");
+const envelopeService_1 = require("../services/envelope/envelopeService");
+const transactions_import_1 = require("./transactions.import");
+const transactionRepository = new transaction_repository_1.TransactionRepository();
+const categoryRepository = new category_repository_1.CategoryRepository();
+const envelopeService = new envelopeService_1.EnvelopeService();
+const transactionService = new transaction_service_1.TransactionService(transactionRepository, categoryRepository, envelopeService);
+const transactionController = new transaction_controller_1.TransactionController(transactionService);
+exports.transactionRouter = (0, express_1.Router)();
+exports.transactionRouter.use(auth_middleware_1.authMiddleware);
+// rotas de importacao de extratos
+exports.transactionRouter.use(transactions_import_1.importRouter);
+exports.transactionRouter.post("/", transactionController.create);
+exports.transactionRouter.get("/", transactionController.list);
+exports.transactionRouter.get("/:id", transactionController.getById);
+exports.transactionRouter.put("/:id", transactionController.update);
+exports.transactionRouter.delete("/:id", transactionController.delete);

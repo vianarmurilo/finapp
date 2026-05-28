@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.familyRouter = void 0;
+const express_1 = require("express");
+const family_controller_1 = require("../controllers/family.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const family_repository_1 = require("../repositories/family.repository");
+const family_service_1 = require("../services/family.service");
+const familyRepository = new family_repository_1.FamilyRepository();
+const familyService = new family_service_1.FamilyService(familyRepository);
+const familyController = new family_controller_1.FamilyController(familyService);
+exports.familyRouter = (0, express_1.Router)();
+exports.familyRouter.use(auth_middleware_1.authMiddleware);
+exports.familyRouter.post("/groups", familyController.createGroup);
+exports.familyRouter.post("/groups/join", familyController.joinGroup);
+exports.familyRouter.get("/groups", familyController.listGroups);
+exports.familyRouter.get("/groups/:id/dashboard", familyController.dashboard);

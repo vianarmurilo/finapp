@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "FinMind AI+ API",
+    "description": "Colecao para validar endpoints principais do backend FinMind AI+",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3333/api" },
+    { "key": "token", "value": "" },
+    { "key": "transactionId", "value": "" },
+    { "key": "goalId", "value": "" },
+    { "key": "subscriptionId", "value": "" },
+    { "key": "familyGroupId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth - Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Murilo\",\n  \"email\": \"murilo@finmind.com\",\n  \"password\": \"12345678\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"murilo@finmind.com\",\n  \"password\": \"12345678\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Transactions - List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/transactions"
+      }
+    },
+    {
+      "name": "Transactions - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"categoryId\": \"<category-uuid>\",\n  \"type\": \"EXPENSE\",\n  \"amount\": 59.9,\n  \"description\": \"Streaming\",\n  \"occurredAt\": \"2026-03-30T12:00:00.000Z\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Goals - List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/goals"
+      }
+    },
+    {
+      "name": "Subscriptions - List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/subscriptions"
+      }
+    },
+    {
+      "name": "Family - List Groups",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/family/groups"
+      }
+    },
+    {
+      "name": "Analytics - Overview",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/analytics/overview"
+      }
+    },
+    {
+      "name": "Prediction - GET /prediction",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/prediction?daysAhead=30"
+      }
+    },
+    {
+      "name": "Alerts - List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/alerts?budgetLimit=3000"
+      }
+    }
+  ]
+}
