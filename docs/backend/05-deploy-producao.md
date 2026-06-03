@@ -16,6 +16,17 @@ Configurar no ambiente de producao:
 - JWT_SECRET=<segredo forte, minimo 32 caracteres>
 - JWT_EXPIRES_IN=1d
 
+### Docker + porta 3080
+
+Para subir a API e o banco em Docker, use o compose de producao do backend:
+
+```bash
+cd backend
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+A API sobe em `http://localhost:3080/api/health` no ambiente local ou em `http://SEU_SERVIDOR:3080/api/health` no servidor do professor.
+
 ### Build e start
 
 No servidor (ou pipeline):

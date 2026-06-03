@@ -143,6 +143,7 @@ npm run test
 ## Deploy (dicas rápidas)
 
 - Produção: criar imagem Docker da API, configurar variáveis de ambiente e apontar para um banco Postgres gerenciado.
+- Para o fluxo atual do projeto, a API pode subir em Docker na porta 3080 com `cd backend && docker compose -f docker-compose.prod.yml up -d --build`.
 - Use `prisma migrate deploy` em ambientes de produção para aplicar migrações.
 - Considere usar um serviço de CI/CD para buildar artefatos Flutter e publicar releases.
 
